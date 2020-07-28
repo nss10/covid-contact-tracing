@@ -4,13 +4,13 @@ from db_interface import *
 
 def room_entry(event):
     room_id, status = event['code'].split('-')
-    user_id = event['uid']
+    user_id, timeStamp = event['uid'], event['ts']
     # print(room_id,user_id,timeStamp,status)
     room_info = fetch_room_info(room_id)
     if isJanitor(user_id):
         room_info['clean_prompt'] = 1
     else:
-        handle_missing_events(room_id, user_id, status)
+        handle_missing_events(room_id, user_id, status, timeStamp)
 
         add_event(event)
         update_room_capacity(room_id, user_id, status)
@@ -19,11 +19,11 @@ def room_entry(event):
 
 def room_exit(event):
     room_id, status = event['code'].split('-')
-    user_id = event['uid']
+    user_id, timeStamp = event['uid'], event['ts']
     if isJanitor(user_id):
         room_clean_exit(event)
     else:
-        handle_missing_events(user_id, room_id, status)
+        handle_missing_events(user_id, room_id, status, timeStamp)
         add_event(event)
         update_room_capacity(room_id, user_id, status)
         return {"code": 200, "status": "Success"}
@@ -41,10 +41,21 @@ def isJanitor(uid):
     pass
 
 
-def handle_missing_events(room_id, user_id, status):
+def handle_missing_events(room_id, user_id, status, timeStamp):
     old_rec = fetch_last_user_record(room_id, user_id)
     #WIP
-    pass
+    if status == 0:  # room exit
+        if old_rec['status'] == 0:  # Missing current room entry
+            return {"message": "Missing current room entry", [{"room_id": room_id, "proposed_time": dt.strptime(timeStamp) + dt.timedelta(minutes=30)}]}
+        # Missing current room entry and old room exit
+        elif old_rec['status'] == 1 and old_rec['room_id'] != room_id:
+            return {\
+                        "message": "Missing current room entry",
+                        "info" :[ \
+                                    {"room_id": room_id, "proposed_time": dt.strptime(timeStamp) + dt.timedelta(minutes=30)}, \
+                                    {"room_id": old_rec['room_id'], "proposed_time": dt.strptime(old_rec['timeStamp']) + dt.timedelta(minutes=-30)} \
+                                ] \
+                    }
 
 
 def room_clean(event):
