@@ -29,3 +29,6 @@ def fetch_rooms_visited(user_id):
 
 def fetch_overlapped_users(user_id, room_id, timestamp):
     return [] #List of user objects
+
+def fetch_events_in_window(window):
+    return []
