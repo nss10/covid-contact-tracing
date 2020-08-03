@@ -8,7 +8,7 @@ class Agent():
         self.user_id = user_id
         self.room_visits = self.populate_room_visits()
         self.overlapped_users = self.populate_overlapped_users()
-
+        
     def populate_room_visits(self):
         room_visits = RoomVisits()
         events = fetch_rooms_visited(self.user_id) #TODO: implementation needed
@@ -17,22 +17,23 @@ class Agent():
         return room_visits
 
     def populate_overlapped_users(self):
-        overlap_users = OverlappedUsers()
+        overlapped_users = OverlappedUsers()
         room_visits = self.room_visits
         for room in room_visits:
                 for infected_window in room.infected_windows :
                     events = fetch_events_in_window(room.room_id, infected_window) #TODO: implementation needed
-                    populate_user_visit_windows(room, events, infected_window)
-        # TODO: 
-                #from the remaining events, find entry and exit pairs and create overlap object -- iterate through room.user_visits
-                #add the overlap object to the overlapped user with the user_id fetched from the events
-                    #overlap_users.get(user_id).add_overlap(overlap)
-            # return overlap_users
-        return []
+                    self.populate_user_visit_windows(room, events, infected_window)
+                #from the visit windows create , create overlap object -- iterate through room.user_visits
+                for user_visit in room.user_visits:
+                #Fetch the overlapped user with the user_id fetched from the events
+                    overlapped_user = overlapped_users.get(user_visit.user_id)
+                    for agent_visit in room.agent_visits:
+                        if(user_visit.end >= agent_visit.start): # If he falls in potential infectant window
+                            overlapped_user.add_overlap(Overlap(room.room_id, agent_visit, user_visit))
+        return overlapped_users
 
     
     def populate_user_visit_windows(self, room, events, infected_window):
-     
         events.sort(key = attrgetter('user_id', 'timestamp')) # Sort them with user_ids and timestamps, to make an entry exit pair
         for entry_event, exit_event in zip(events[0::2], events[1::2]):
             #filter agent events and all other events with both entry and exit before agent's first entry

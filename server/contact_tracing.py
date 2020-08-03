@@ -57,16 +57,6 @@ class InfectedWindows():
     def __iter__(self):
         return iter(self.infected_windows.values())
 
-class Overlap():
-    """ Represents the overlap of two time frames (Windows) """
-    def __init__(self, room_id, agent_visit_window, user_visit_window):
-        self.room_id = room_id
-        self.agent_visit_window = agent_visit_window
-        self.user_visit_window = user_visit_window
-        self.overlap_index = self.__compute_overlap_index()
-    def __compute_overlap_index(self):
-        return 0
-
 class RoomVisits():
     class RoomVisit():
         def __init__(self, room_id):
@@ -95,6 +85,16 @@ class RoomVisits():
 
     def __iter__(self) :
         return iter(self.rooms.values())
+
+class Overlap():
+    """ Represents the overlap of two time frames (Windows) """
+    def __init__(self, room_id, agent_visit_window, user_visit_window):
+        self.room_id = room_id
+        self.agent_visit_window = agent_visit_window
+        self.user_visit_window = user_visit_window
+        self.overlap_index = self.__compute_overlap_index()
+    def __compute_overlap_index(self):
+        return 0
 
 
 
