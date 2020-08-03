@@ -1,5 +1,6 @@
 import random
 from datetime import datetime, timedelta
+from operator import attrgetter
 
 base = datetime(2020, 1, 22, 00, 00, 00)
 def gen_un(num=10):
@@ -11,7 +12,7 @@ def gen_rid(num=10):
 # or a function
 def gen_datetime(base,endTime=False):
     # generate a datetime in format yyyy-mm-dd hh:mm:ss.000000
-    daysLimit = 0 if endTime else 10
+    daysLimit = 0 if endTime else 0
     base += timedelta(days=random.randint(0,daysLimit), hours=random.randint(0,10), minutes=random.randint(1,30), seconds=random.randint(0,10), microseconds=random.randint(0,100000))
     return base
 
@@ -52,11 +53,11 @@ def main():
     all_events=[]
     for un in unList:
         base = datetime(2020, 1, 22, 00, 00, 00)
-        all_events+=(get_entry_exit_pairs(un, ridList,30))
+        all_events+=(get_entry_exit_pairs(un, ridList,10000))
     
     all_events.sort(key=lambda event:event.user_id)
     addToFile(all_events,"events-user_id.txt")
-    all_events.sort(key=lambda event:event.room_id)
+    all_events.sort(key=attrgetter('room_id','timestamp'))
     addToFile(all_events,"events-room_id.txt")
     all_events.sort(key=lambda event:event.timestamp)
     addToFile(all_events,"events-timestamp.txt")
