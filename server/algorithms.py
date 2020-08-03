@@ -49,13 +49,14 @@ def isJanitor(uid):
 
 def handle_missing_events(room_id, user_id, status, timestamp):
     old_rec = fetch_last_user_record(room_id, user_id)
-    #WIP
+    
     if status == 0:  # room exit
         if old_rec['status'] == 0:  # Missing current room entry
             return {"message": "Missing current room entry", "info": [{"room_id": room_id, "proposed_time": (dt.strptime(timestamp) + dt.timedelta(minutes=30))}]}
 
-        # Missing current room entry and old room exit
-        elif old_rec['status'] == 1 and old_rec['room_id'] != room_id:
+        # Missing current room entry and old room exit 
+        #FIXME: what if he enters old room at 7:00 and exits current room at 7:05?
+        elif old_rec['status'] == 1 and old_rec['room_id'] != room_id: 
             return {
                 "message": "Missing current room entry and old room exit",
                 "info": [
