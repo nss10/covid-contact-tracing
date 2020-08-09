@@ -1,19 +1,43 @@
 from db_interface import fetch_overlapped_users, fetch_rooms_visited
-from helper import  get_infected_window
 from enum import IntEnum
+
+
+class Room():
+    def __init__(self, id, name, max_capacity, last_sanitized_time=None, current_strength=None):
+        self.id=id
+        self.name=name
+        self.max_capacity=max_capacity
+        self.last_sanitized_time=last_sanitized_time
+        self.current_strength=current_strength
+    def __str__(self):
+        return f"Room({self.id},{self.name},{self.max_capacity},{self.last_sanitized_time},{self.current_strength})"
+
+
 
 
 class Status(IntEnum):
     ENTRY = 1
     EXIT = 0
 
-class Event():
+class SanitizedStatus(IntEnum):
+    IN_PROGRESS=1
+    CLEAN=0
 
+class Event():
     def __init__(self, user_id, room_id, status, timestamp):
         self.user_id = user_id
         self.room_id = room_id
         self.status = Status.ENTRY if status else Status.EXIT 
         self.timestamp = timestamp
+    def __str__(self):
+        return f"Event({self.user_id},{self.room_id}, {self.status}, {self.timestamp})"
+
+class SanitizedEvent(Event):
+    def __init__(self, user_id, room_id, status, timestamp):
+        super().__init__(user_id, room_id,None,timestamp)
+        self.status = SanitizedStatus.IN_PROGRESS if status else SanitizedStatus.CLEAN
+    def __str__(self):
+        return f"SanitizedEvent({self.user_id},{self.room_id}, {self.status}, {self.timestamp})"
 
 class Window():
     """ A window is a time frame   """
@@ -121,3 +145,9 @@ class OverlappedUsers():
 
     def __iter__(self) :
         return iter(self.users.values())
+
+
+def get_infected_window(visit_window):
+    #TODO: Need to add logic to get the window between two sanitized times
+    # of the given room. 
+    return Window(start = None, end = None) 
