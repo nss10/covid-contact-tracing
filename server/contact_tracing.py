@@ -1,6 +1,5 @@
-from db_interface import fetch_overlapped_users, fetch_rooms_visited
 from enum import IntEnum
-
+import json
 
 class Room():
     def __init__(self, id, name, max_capacity, last_sanitized_time=None, current_strength=None):
@@ -11,9 +10,6 @@ class Room():
         self.current_strength=current_strength
     def __str__(self):
         return f"Room({self.id},{self.name},{self.max_capacity},{self.last_sanitized_time},{self.current_strength})"
-
-
-
 
 class Status(IntEnum):
     ENTRY = 1
@@ -31,6 +27,7 @@ class Event():
         self.timestamp = timestamp
     def __str__(self):
         return f"Event({self.user_id},{self.room_id}, {self.status}, {self.timestamp})"
+
 
 class SanitizedEvent(Event):
     def __init__(self, user_id, room_id, status, timestamp):

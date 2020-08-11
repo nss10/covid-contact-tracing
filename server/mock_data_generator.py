@@ -2,6 +2,7 @@ import random
 from datetime import datetime, timedelta
 from operator import attrgetter
 from contact_tracing import Event, SanitizedEvent, Room
+import db_interface as db
 base = datetime(2020, 1, 22, 00, 00, 00)
 
 room_names = ['Faner Hall', 'CS Main office', 'Linux Lab', 'Conference Room', 'Subway',
@@ -27,10 +28,6 @@ def gen_datetime(base, max_hour_limit=10):
     base += timedelta(hours=random.randint(0, max_hour_limit),
                       minutes=random.randint(1, 30), seconds=random.randint(0, 10), microseconds=random.randint(0, 100000))
     return base
-
-def get_room_entries(ridList):
-    global room_names
-    
 
 def get_entry_exit_pairs(user_id, ridList, num=100):
     events = []
@@ -105,6 +102,18 @@ def main():
     generate_mock_event_files(all_events, 'events')
     generate_mock_event_files(all_sanitized_events, 'sanitized-events')
 
+
+
+    #TODO: Add operations at 'one level up' -- handling things like, update_strength, update_last_sanitized_time, get_clean_window etc. 
+    # The latter two are needed for us to see how the algo works
+    for room in roomList:
+        db.add_room(room.__dict__)
+    
+    for event in all_events:
+        db.add_event(event.__dict__)
+
+    for sanitized_event in all_sanitized_events:
+        db.add_sanitized_event(sanitized_event.__dict__)
 
     return all_events, all_sanitized_events
 

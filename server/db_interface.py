@@ -1,4 +1,26 @@
 from datetime import datetime as dt
+from contact_tracing import Event
+from pymongo import MongoClient, errors
+import json
+DB_LOCAL={
+    "uri":'localhost',
+    "port":27017,   
+    "dbname":"contact-tracing",
+    "un":"",
+    "pwd":"",
+    "rooms":"roomsCollection",
+    "events":"eventsCollection",
+    "sanitizedEvents":"sanitizedEventsCollection"
+}
+dbConf = DB_LOCAL
+
+client = MongoClient(dbConf['uri'], dbConf['port'], username=dbConf['un'],password=dbConf['pwd'],authsource=dbConf['dbname'])
+db = client[dbConf["dbname"]]
+eventCollection = db[dbConf['events']]
+roomCollection = db[dbConf['rooms']]
+sanitizedEventCollection = db[dbConf['sanitizedEvents']]
+
+
 def fetch_room_info(room_id):
     #return room{name, last_sanitized_time}
     return {"name":"pilion hall", "last_sanitized_time":dt(2020,4,23,19,13,34,123), "current_capacity":14, "max_capacity":20}
@@ -7,12 +29,17 @@ def fetch_last_user_record(user_id, room_id):
     #Fetch the last event with user_id and room_id with status as 'Entry'
     return {"rid":room_id,"uid":user_id,"status":0,"timestamp":dt(2020,4,23,19,13,34,123)}
 
+def add_room(room):
+    roomCollection.insert([room])
+
 def add_event(event):
     #Insert this record in events collection
+    eventCollection.insert([event])
     pass
 
 def add_sanitized_event(event):
     #Insert this record in sanitized events collection
+    sanitizedEventCollection.insert([event])
     pass
 
 def set_room_capacity(room_id, capacity):
