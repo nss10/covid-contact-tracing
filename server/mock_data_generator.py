@@ -11,15 +11,24 @@ room_names = ['Faner Hall', 'CS Main office', 'Linux Lab', 'Conference Room', 'S
 
 
 def gen_un(num=10):
-    return [random.randint(10001, 99999) for i in range(num)]
+    retVal = [70983, 67375, 38274, 15948, 39332, 46551, 89452, 65581, 91513, 56695, 93495, 14489, 33796, 22258, 35436, 28273, 15909, 49829, 91888, 41355, 12265, 25575, 13295, 94272, 75041, 79724, 94331, 49094, 97765, 76097, 27260, 79237, 56386, 41642, 76750, 19871, 80257, 18477, 84637, 46571, 44554, 84530, 48237, 71753, 77888, 33971, 60273, 54860, 29805, 20182, 50195, 69364, 69740, 66008, 36869, 90767, 76004, 17735, 70777, 92915, 87067, 63783, 49224, 86903, 81915, 56155, 35367, 50982, 90378, 96810, 49721, 29100, 34701, 53327, 35004, 51669, 85598, 38272, 80275, 59151, 50044, 27577, 69158, 33447, 63480, 44912, 57918, 46857, 77435, 76053, 15148, 16125, 54986, 31127, 38305, 65443, 29092, 75663, 98398, 48838]
+    #[random.randint(10001, 99999) for i in range(num)]
+    # print(retVal)
+    return retVal
 
 
 def gen_bmp_un(num=10):
-    return ["BMP" + str(random.randint(10001, 99999)) for i in range(num)]
+    retVal = ['BMP32369', 'BMP85052', 'BMP26184', 'BMP95577', 'BMP75406', 'BMP50291', 'BMP87861', 'BMP16918', 'BMP72539', 'BMP80786']
+    #["BMP" + str(random.randint(10001, 99999)) for i in range(num)]
+    # print(retVal)
+    return retVal
 
 
 def gen_rid(num=10):
-    return [chr(65 + random.randint(0, 25)) + str(random.randint(10001, 99999)) for i in range(num)]
+    retVal = ['J28929', 'P72143', 'S87978', 'L83225', 'B21970', 'S96687', 'L89485', 'D49972', 'G19247', 'S15838']
+    #[chr(65 + random.randint(0, 25)) + str(random.randint(10001, 99999)) for i in range(num)]
+    # print(retVal)
+    return retVal
 
 # or a function
 
