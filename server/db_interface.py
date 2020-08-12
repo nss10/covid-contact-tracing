@@ -23,8 +23,9 @@ sanitizedEventCollection = db[dbConf['sanitizedEvents']]
 
 
 def fetch_room_info(room_id):
-    return list(roomCollection.find({"id": room_id}, {'_id': 0}))[0]
-
+    print(room_id)
+    room =  list(roomCollection.find({"id": room_id}, {'_id': 0}))
+    return room[0] if room is not None else None
 
 def fetch_last_user_record(user_id, room_id):
     #Fetch the last event with user_id and room_id with status as 'Entry'
