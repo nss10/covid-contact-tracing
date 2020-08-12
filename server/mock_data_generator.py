@@ -1,8 +1,9 @@
 import random
 from datetime import datetime, timedelta
 from operator import attrgetter
-from contact_tracing import Event, SanitizedEvent, Room
+from contact_tracing import Event, SanitizedEvent, Room, SanitizedStatus
 import db_interface as db
+import algorithms as algo
 base = datetime(2020, 1, 22, 00, 00, 00)
 
 room_names = ['Faner Hall', 'CS Main office', 'Linux Lab', 'Conference Room', 'Subway',
@@ -29,6 +30,7 @@ def gen_datetime(base, max_hour_limit=10):
                       minutes=random.randint(1, 30), seconds=random.randint(0, 10), microseconds=random.randint(0, 100000))
     return base
 
+
 def get_entry_exit_pairs(user_id, ridList, num=100):
     events = []
     start = base
@@ -42,6 +44,7 @@ def get_entry_exit_pairs(user_id, ridList, num=100):
         events.append(Event(user_id, room_id, 0, end))
         start = end
     return events
+
 
 def get_sanitized_events_for_the_day(unList, roomList, date, frequency=1):
     events = []
@@ -64,6 +67,7 @@ def addToFile(events, fname):
     for event in events:
         f.write(str(event)+"\n")
 
+
 def generate_room_entries(rooms):
     rooms.sort(key=attrgetter('id'))
     addToFile(rooms, f"room-by-id.txt")
@@ -71,6 +75,7 @@ def generate_room_entries(rooms):
     addToFile(rooms, f"room-by-name.txt")
     rooms.sort(key=attrgetter('max_capacity'))
     addToFile(rooms, f"room-by-capacity.txt")
+
 
 def generate_mock_event_files(events, title):
     events.sort(key=attrgetter('user_id'))
@@ -87,7 +92,8 @@ def main():
     bmpUserList = gen_bmp_un(10)
     ridList = gen_rid(10)
     random.shuffle(room_names)
-    roomList = [Room(rid, room_names[i], random.randint(2, 100)) for i,rid in enumerate(ridList)]
+    roomList = [Room(rid, room_names[i], random.randint(2, 100))
+                for i, rid in enumerate(ridList)]
     all_events, all_sanitized_events = [], []
     for un in unList:
         base = datetime(2020, 1, 22, 00, 00, 00)
@@ -96,24 +102,20 @@ def main():
     for dayCount in range((datetime.now() - base).days):
         date = datetime(2020, 1, 22, 00, 00, 00) + timedelta(days=dayCount)
         all_sanitized_events += get_sanitized_events_for_the_day(
-            bmpUserList, ridList,  date,frequency=2)
+            bmpUserList, ridList,  date, frequency=2)
 
     generate_room_entries(roomList)
     generate_mock_event_files(all_events, 'events')
     generate_mock_event_files(all_sanitized_events, 'sanitized-events')
 
-
-
-    #TODO: Add operations at 'one level up' -- handling things like, update_strength, update_last_sanitized_time, get_clean_window etc. 
+    #TODO: Add operations at 'one level up' -- handling things like, update_strength, update_last_sanitized_time, get_clean_window etc.
     # The latter two are needed for us to see how the algo works
     for room in roomList:
         db.add_room(room.__dict__)
-    
-    for event in all_events:
-        db.add_event(event.__dict__)
 
-    for sanitized_event in all_sanitized_events:
-        db.add_sanitized_event(sanitized_event.__dict__)
+    for event in sorted(all_events+all_sanitized_events, key=attrgetter('timestamp')):
+        algo.add_event_algo(event)
+
 
     return all_events, all_sanitized_events
 

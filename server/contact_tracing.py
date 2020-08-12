@@ -23,7 +23,7 @@ class Event():
     def __init__(self, user_id, room_id, status, timestamp):
         self.user_id = user_id
         self.room_id = room_id
-        self.status = Status.ENTRY if status else Status.EXIT 
+        self.status = Status.ENTRY if int(status) == 1 else Status.EXIT 
         self.timestamp = timestamp
     def __str__(self):
         return f"Event({self.user_id},{self.room_id}, {self.status}, {self.timestamp})"
@@ -31,7 +31,7 @@ class Event():
 
 class SanitizedEvent(Event):
     def __init__(self, user_id, room_id, status, timestamp):
-        super().__init__(user_id, room_id,None,timestamp)
+        super().__init__(user_id, room_id,status,timestamp)
         self.status = SanitizedStatus.IN_PROGRESS if status else SanitizedStatus.CLEAN
     def __str__(self):
         return f"SanitizedEvent({self.user_id},{self.room_id}, {self.status}, {self.timestamp})"
