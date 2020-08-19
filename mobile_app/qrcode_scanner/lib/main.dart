@@ -5,6 +5,8 @@ import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 
+import 'package:flutter_nfc_reader/flutter_nfc_reader.dart';
+
 void main() {
   runApp(MyApp());
 }
@@ -19,7 +21,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'Covid Contact Tracing'),
     );
   }
 }
@@ -35,8 +37,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   String _result = "Text";
-
-  Future<http.Response> _sendQR() async {
+  NfcData _nfcData;
+  Future<http.Response> _sendRequest() async {
     http.Response response = await http.post(
       'http://192.168.2.40:5000/postTest',
       headers: <String, String>{
@@ -58,7 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
       var qrResult = await BarcodeScanner.scan();
       setState(() {
         _result = qrResult.rawContent;
-        _sendQR();
+        _sendRequest();
       });
     } on PlatformException catch (e) {
       if (e.code == BarcodeScanner.cameraAccessDenied) {
@@ -67,6 +69,50 @@ class _MyHomePageState extends State<MyHomePage> {
         });
       }
     }
+  }
+
+  Future<void> startNFC() async {
+    NfcData response;
+
+    setState(() {
+      _nfcData = NfcData();
+      _nfcData.status = NFCStatus.reading;
+    });
+
+    print('NFC: Scan started');
+
+    try {
+      print('NFC: Scan readed NFC tag');
+      response = await FlutterNfcReader.read();
+    } on PlatformException {
+      print('NFC: Scan stopped exception');
+    }
+    setState(() {
+      _nfcData = response;
+    });
+  }
+
+  Future<void> stopNFC() async {
+    NfcData response;
+
+    try {
+      print('NFC: Stop scan by user');
+      response = await FlutterNfcReader.stop();
+    } on PlatformException {
+      print('NFC: Stop scan exception');
+      response = NfcData(
+        id: '',
+        content: '',
+        error: 'NFC scan stop exception',
+        statusMapper: '',
+      );
+      response.status = NFCStatus.error;
+      ;
+    }
+
+    setState(() {
+      _nfcData = response;
+    });
   }
 
   @override
@@ -80,10 +126,10 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
-              'You have pushed the button this many times:',
+              'Response Text',
             ),
             Text(
-              '$_result',
+              '$_nfcData',
               style: Theme.of(context).textTheme.headline4,
             ),
           ],
@@ -92,7 +138,7 @@ class _MyHomePageState extends State<MyHomePage> {
       floatingActionButton: FloatingActionButton.extended(
           icon: Icon(Icons.camera_alt),
           label: Text("Scan"),
-          onPressed: _sendQR),
+          onPressed: startNFC),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }

@@ -83,6 +83,15 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_nfc_reader:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: master
+      resolved-ref: "40aaf864840b7a7280170cd11f5a4155c3656663"
+      url: "git://github.com/matteocrippa/flutter-nfc-reader.git"
+    source: git
+    version: "0.1.1"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -228,3 +237,4 @@ packages:
     version: "3.6.1"
 sdks:
   dart: ">=2.7.0 <3.0.0"
+  flutter: ">=0.9.3-pre"
