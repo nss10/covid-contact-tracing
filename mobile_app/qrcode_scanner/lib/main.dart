@@ -40,13 +40,14 @@ class _MyHomePageState extends State<MyHomePage> {
   NfcData _nfcData;
   Future<http.Response> _sendRequest() async {
     http.Response response = await http.post(
-      'http://192.168.2.40:5000/postTest',
+      'http://10.100.192.74:5000/addEvent',
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: jsonEncode(<String, String>{
-        'userId': '1234567',
-        'code': "2309",
+        'room_id': "J28929",
+        'user_id': '70983',
+        'status': '1',
         'timestamp': new DateTime.now().millisecondsSinceEpoch.toString()
       }),
     );
