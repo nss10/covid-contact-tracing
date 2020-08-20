@@ -1,7 +1,8 @@
 from datetime import datetime as dt
-from contact_tracing import Event
+from entities import Event, Window, Status
 from pymongo import MongoClient, errors
 import json
+from operator import attrgetter
 DB_LOCAL = {
     "uri": 'localhost',
     "port": 27017,
@@ -20,7 +21,7 @@ db = client[dbConf["dbname"]]
 eventCollection = db[dbConf['events']]
 roomCollection = db[dbConf['rooms']]
 sanitizedEventCollection = db[dbConf['sanitizedEvents']]
-
+baseDate = dt(2020,1,22,0,0,0,000)
 
 def fetch_room_info(room_id):
     print(room_id)
@@ -61,17 +62,60 @@ def set_last_sanitized_ts(room_id, ts):
         roomCollection.update(
             {"id": room_id}, {"$set": {"last_sanitized_time": ts}})
 
-def fetch_rooms_visited(user_id):
-    return []  # rooms
+def fetch_visit_events_of_user(user_id):
+    ''' Returns list of event objects of all the rooms and their timestamps that are visited by the given user'''
+    return [getEventObject(event) for event in sorted(list(eventCollection.find({"user_id":int(user_id)},{"_id":0})), key= lambda d : d['timestamp'])]
+    
 
-
-def fetch_overlapped_users(user_id, room_id, timestamp):
+def fetch_overlapped_users(user_id, room_id, timestamp):  #FIXME: Never used -- probablt have to kill it
     return []  # List of user objects
 
+def fetch_entry_event(event):
+    return getEventObject(list(eventCollection.find({"user_id":event.user_id, "room_id":event.room_id, "status":1 , "timestamp":{"$lt":event.timestamp}}, {"_id":0}))[-1])
+
+def fetch_exit_event(event):
+    return getEventObject(list(eventCollection.find({"user_id":event.user_id, "room_id":event.room_id, "status":0 , "timestamp":{"$gt":event.timestamp}}, {"_id":0}))[0])
+    # return Event(user_id=None, room_id=None, status=None,timestamp=None)
 
 def fetch_events_in_window(room_id, window):
-    return []
+    events = [getEventObject(event) for event in sorted(list(eventCollection.find({"room_id":room_id,"timestamp":{"$gte" : window.start, "$lte":window.end} },{"_id":0})), key= lambda d : d['timestamp'])]
+    events.sort(key=attrgetter('user_id','timestamp'))
+    closureList = []
+    i=0
+    while i < len(events):
+        event = events[i]
+        if(event.status==Status.EXIT):
+            closureList.append(fetch_entry_event(event))
+        elif(event.status==Status.ENTRY):
+            if(i==len(events)-1 or (i<len(events)-1 and event.user_id!=events[i+1].user_id)) :
+                closureList.append(fetch_exit_event(event))
+            else:
+                i+=2
+                continue
+        i+=1
+    events+=closureList
+    return events         
+        
+
+def get_infected_window(room_id, visit_window):
+    '''Returns window of between two sanitized times that happened prior to the start and after the end of the given window'''
+    
+    #timestamp in sanitized collection for a time before the window start 
+    startList =  list(sanitizedEventCollection.find({"room_id":room_id, "status":0 , "timestamp":{"$lte":visit_window.start}}, {"_id":0, "timestamp":1}))
+    
+    start = startList[-1]['timestamp'] if len(startList) > 0 else baseDate
+    
+    # First cleaning window begin, after user has left
+    safe_cleaning_time_begin = (list(sanitizedEventCollection.find({"room_id":room_id, "status":1 , "timestamp":{"$gte":visit_window.end}}, {"_id":0, "timestamp":1}))[0])['timestamp']
+   
+    #timestamp in sanitized collection for a time after the window end -- using safe time to begin cleaning 
+    end =  (list(sanitizedEventCollection.find({"room_id":room_id, "status":0 , "timestamp":{"$gte":safe_cleaning_time_begin}}, {"_id":0, "timestamp":1}))[0])['timestamp']
+    return Window(start, end) 
+
+
+def getEventObject(event):
+    return Event(event['user_id'],event['room_id'], event['status'], event['timestamp'])
 
 
 if __name__ == "__main__":
-    print(fetch_room_info("Y85525"))
+    print(get_infected_window("B21970", Window(dt(2020, 1, 24, 9, 0, 0, 0), dt(2020, 1, 24, 19, 0, 0, 0))))
