@@ -117,8 +117,6 @@ def main():
     generate_mock_event_files(all_events, 'events')
     generate_mock_event_files(all_sanitized_events, 'sanitized-events')
 
-    #TODO: Add operations at 'one level up' -- handling things like, update_strength, update_last_sanitized_time, get_clean_window etc.
-    # The latter two are needed for us to see how the algo works
     for room in roomList:
         db.add_room(room.__dict__)
 

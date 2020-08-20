@@ -46,7 +46,10 @@ class Window():
         return hash((self.start, self.end))
 
     def __str__(self):
-        return "(" + str(self.start.replace(microsecond=0).isoformat()) + " to " + str(self.end.replace(microsecond=0).isoformat()) +")"
+        return "(" + str(self.start.isoformat()) + " to " + str(self.end.isoformat()) +")"
+    
+    def __eq__(self, other):
+        return self.start == other.start and self.end == other.end
 
 class UserVisitWindow(Window):
     def __init__(self, user_id, start, end):
@@ -58,23 +61,25 @@ class UserVisitWindow(Window):
 
 class Overlap():
     """ Represents the overlap of two time frames (Windows) """
-    def __init__(self, room_id, agent_visit_window, user_visit_window):
+    def __init__(self, room_id, agent_visit_window, user_visit_window, infected_window):
         self.room_id = room_id
         self.agent_visit_window = agent_visit_window
         self.user_visit_window = user_visit_window
+        self.infected_window = infected_window
         self.overlap_index = self.__compute_overlap_index()
 
     def __str__(self):
-        return "room_id: " + self.room_id + " agent-window : " +str(self.agent_visit_window) +" user-window : " +str(self.user_visit_window)+"\n"
+        return "room_id: " + self.room_id + " agent-window : " +str(self.agent_visit_window) +" user-window : " +str(self.user_visit_window)+" infected-window : " +str(self.infected_window)+"\n"
     
     def __eq__(self,other):
         return self.room_id==other.room_id and \
-            hash(self.agent_visit_window)==hash(other.agent_visit_window) and \
-             hash(self.user_visit_window)==hash(other.user_visit_window)
+            self.agent_visit_window==other.agent_visit_window and \
+             self.user_visit_window==other.user_visit_window
                 
     def __hash__(self):
         return hash((self.room_id, self.agent_visit_window, self.user_visit_window))       
 
     def __compute_overlap_index(self):
+        #TODO: Implement logic to compute overlap index
         return 0
 

@@ -40,13 +40,11 @@ def add_room(room):
 def add_event(event):
     #Insert this record in events collection
     eventCollection.insert([event.__dict__])
-    pass
 
 
 def add_sanitized_event(event):
     #Insert this record in sanitized events collection
     sanitizedEventCollection.insert([event.__dict__])
-    pass
 
 
 def set_room_capacity(room_id, capacity):
@@ -67,15 +65,11 @@ def fetch_visit_events_of_user(user_id):
     return [getEventObject(event) for event in sorted(list(eventCollection.find({"user_id":int(user_id)},{"_id":0})), key= lambda d : d['timestamp'])]
     
 
-def fetch_overlapped_users(user_id, room_id, timestamp):  #FIXME: Never used -- probablt have to kill it
-    return []  # List of user objects
-
 def fetch_entry_event(event):
     return getEventObject(list(eventCollection.find({"user_id":event.user_id, "room_id":event.room_id, "status":1 , "timestamp":{"$lt":event.timestamp}}, {"_id":0}))[-1])
 
 def fetch_exit_event(event):
     return getEventObject(list(eventCollection.find({"user_id":event.user_id, "room_id":event.room_id, "status":0 , "timestamp":{"$gt":event.timestamp}}, {"_id":0}))[0])
-    # return Event(user_id=None, room_id=None, status=None,timestamp=None)
 
 def fetch_events_in_window(room_id, window):
     events = [getEventObject(event) for event in sorted(list(eventCollection.find({"room_id":room_id,"timestamp":{"$gte" : window.start, "$lte":window.end} },{"_id":0})), key= lambda d : d['timestamp'])]
@@ -94,6 +88,7 @@ def fetch_events_in_window(room_id, window):
                 continue
         i+=1
     events+=closureList
+    events = sorted(events, key = attrgetter('user_id','timestamp')) # Sort them with user_ids and timestamps, to make an entry exit pair
     return events         
         
 

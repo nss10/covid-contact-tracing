@@ -8,23 +8,38 @@ class InfectedWindows():
 
     class InfectedWindow(Window):
         """ Given a visited window finds an infected window for that particular visit. Also contains all visited windows that fall within this"""
-        def __init__(self, room_id, visit_window):
-            window = get_infected_window(room_id, visit_window)
-            super().__init__(window.start, window.end)
+        def __init__(self, infected_window):
+            super().__init__(infected_window.start, infected_window.end)
             self.agent_visit_windows = []
+            self.user_visit_windows = []
         def add_agent_visit_window(self, visit_window):
         # Adds a visit window for this infected window
             self.agent_visit_windows.append(visit_window)
+
+        def add_user_visit_window(self, visit_window):
+        # Adds a visit window for this infected window
+            self.user_visit_windows.append(visit_window)
+
         def get_agent_visits(self):
             return self.agent_visit_windows
-    def __init__(self,room_id):
+    def __init__(self):
         self.infected_windows = {}
-        self.room_id = room_id
 
     def get(self, window):
         if window not in self.infected_windows:
-            self.infected_windows[window] = self.InfectedWindow(self.room_id, window)
+            self.infected_windows[window] = self.InfectedWindow(window)
         return self.infected_windows[window]
+
+    def merge_overlapping_windows(self):
+        sorted_keys = sorted(self.infected_windows, key=lambda iw:iw.start)
+        for iw1,iw2 in zip(sorted_keys[:-1],sorted_keys[1:]):
+            if(iw2.start < iw1.end):
+                new_iw_key = Window(min(iw1.start,iw2.start), max(iw1.end,iw2.end))
+                new_iw = self.InfectedWindow(new_iw_key)
+                new_iw.agent_visit_windows = list(set(self.infected_windows[iw1].agent_visit_windows).union(set(self.infected_windows[iw2].agent_visit_windows)))
+                new_iw.user_visit_windows = list(set(self.infected_windows[iw1].user_visit_windows).union(set(self.infected_windows[iw2].user_visit_windows))) 
+                del self.infected_windows[iw1],self.infected_windows[iw2]
+                self.infected_windows[new_iw_key] = new_iw
     
     def __iter__(self):
         return iter(self.infected_windows.values())
@@ -35,16 +50,18 @@ class RoomVisits():
             self.room_id = room_id
             self.agent_visits = []
             self.user_visits = []
-            self.infected_windows = InfectedWindows(self.room_id)
+            self.infected_windows = InfectedWindows()
 
         def add_agent_visit(self, entry_timestamp, exit_timestamp):
             visit_window = Window(entry_timestamp, exit_timestamp)
             self.agent_visits.append(visit_window)
-            self.infected_windows.get(visit_window).add_agent_visit_window(visit_window)
+            infected_window = get_infected_window(self.room_id, visit_window)
+            self.infected_windows.get(infected_window).add_agent_visit_window(visit_window)
 
-        def add_user_visit(self, user_id, entry_timestamp, exit_timestamp):
+        def add_user_visit(self, user_id, entry_timestamp, exit_timestamp,infected_window):
             user_visit_window = UserVisitWindow(user_id, entry_timestamp, exit_timestamp)
             self.user_visits.append(user_visit_window)
+            self.infected_windows.get(infected_window).add_user_visit_window(user_visit_window)
 
         def __str__(self):
             return str(self.room_id) + " - [" + ", ".join([str(agent_visit) for agent_visit in self.agent_visits]) +"]\n" \
