@@ -1,5 +1,6 @@
 from entities import Event, Window, UserVisitWindow
 from db_interface import get_infected_window
+from datetime import timedelta
 class InfectedWindows():
     """
         Similar to an iterator design patter, this class has a dictionary of all the infected windows, 
@@ -84,17 +85,19 @@ class OverlappedUsers():
         def __init__(self, user_id):
             self.user_id = user_id
             self.overlaps = []
-            self.total_overlap_index = 0
+            self.total_overlap_duration = timedelta(seconds=0)
             self.overlap_frequency = 0
+            self.direct_overlap_frequency = 0
 
         def add_overlap(self, overlap):
             if overlap not in self.overlaps:
                 self.overlaps.append(overlap)
-                self.total_overlap_index += overlap.overlap_index
+                self.total_overlap_duration += overlap.overlap_duration
                 self.overlap_frequency+=1
+                self.direct_overlap_frequency += 0 if overlap.overlap_duration == timedelta(seconds=0) else 1
 
         def __str__(self):
-            retVal = "user_id: " +str(self.user_id) +"\nOverlap_frequency: "+ str(self.overlap_frequency) +"\n total_overlap_index: "+ str(self.total_overlap_index) +"\n\tOverlaps:\n"
+            retVal = "user_id: " +str(self.user_id) +"\nOverlap_frequency: "+ str(self.overlap_frequency) +"("+ str(self.direct_overlap_frequency) +" direct overlaps)\n total_overlap_duration: "+ str(self.total_overlap_duration) +"\n\tOverlaps:\n"
             for overlap in self.overlaps:
                 retVal+=str(overlap)
             return retVal
