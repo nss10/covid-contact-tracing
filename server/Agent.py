@@ -7,7 +7,7 @@ class Agent():
     def __init__(self, user_id):
         self.user_id = user_id
         self.room_visits = self.populate_room_visits()
-        self.__handle_overlapping_infected_windows()
+        # self.__handle_overlapping_infected_windows()  #FIXME: The lower level implementation of the algo is buggy
         self.overlapped_users = self.populate_overlapped_users()
         
     def populate_room_visits(self):
@@ -54,7 +54,7 @@ if __name__ == "__main__":
     # for rv in agent.room_visits:
     #     print("Room - "+rv.room_id)
     #     print("Agent Visits")
-    #     for av in rv.agent_visits:
+    #     for av in rv.get_agent_visits():
     #         print(av)
         
     #     for iw in rv.infected_windows:

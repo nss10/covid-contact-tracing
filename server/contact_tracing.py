@@ -23,6 +23,7 @@ class InfectedWindows():
 
         def get_agent_visits(self):
             return self.agent_visit_windows
+
     def __init__(self):
         self.infected_windows = {}
 
@@ -30,7 +31,7 @@ class InfectedWindows():
         if window not in self.infected_windows:
             self.infected_windows[window] = self.InfectedWindow(window)
         return self.infected_windows[window]
-
+#FIXME: This method is buggy --yielding inconsistent results. Try and fix it. Or kill it. 
     def merge_overlapping_windows(self):
         sorted_keys = sorted(self.infected_windows, key=lambda iw:iw.start)
         for iw1,iw2 in zip(sorted_keys[:-1],sorted_keys[1:]):
@@ -49,20 +50,21 @@ class RoomVisits():
     class RoomVisit():
         def __init__(self, room_id):
             self.room_id = room_id
-            self.agent_visits = []
-            self.user_visits = []
             self.infected_windows = InfectedWindows()
 
         def add_agent_visit(self, entry_timestamp, exit_timestamp):
             visit_window = Window(entry_timestamp, exit_timestamp)
-            self.agent_visits.append(visit_window)
             infected_window = get_infected_window(self.room_id, visit_window)
             self.infected_windows.get(infected_window).add_agent_visit_window(visit_window)
 
         def add_user_visit(self, user_id, entry_timestamp, exit_timestamp,infected_window):
             user_visit_window = UserVisitWindow(user_id, entry_timestamp, exit_timestamp)
-            self.user_visits.append(user_visit_window)
             self.infected_windows.get(infected_window).add_user_visit_window(user_visit_window)
+
+        def get_agent_visits(self):
+            for window in self.infected_windows:
+                for agent_visit in window.get_agent_visits():
+                    yield agent_visit   
 
         def __str__(self):
             return str(self.room_id) + " - [" + ", ".join([str(agent_visit) for agent_visit in self.agent_visits]) +"]\n" \

@@ -1,7 +1,7 @@
 import random
 from datetime import datetime, timedelta
 from operator import attrgetter
-from contact_tracing import Event, SanitizedEvent, Room, SanitizedStatus
+from entities import Event, SanitizedEvent, Room, SanitizedStatus
 import db_interface as db
 import algorithms as algo
 base = datetime(2020, 1, 22, 00, 00, 00)
@@ -43,7 +43,7 @@ def gen_datetime(base, max_hour_limit=10):
 def get_entry_exit_pairs(user_id, ridList, num=100):
     events = []
     start = base
-    for i in range(num):
+    for _ in range(num):
         room_id = ridList[random.randint(0, len(ridList)-1)]
         start = gen_datetime(start)
         if(start >= datetime.now()):
@@ -62,7 +62,7 @@ def get_sanitized_events_for_the_day(unList, roomList, date, frequency=1):
     minLength = min(len(unList), len(roomList))
     for user_id, room_id in zip(unList[:minLength], roomList[:minLength]):
         baseTime = date
-        for i in range(frequency):
+        for _ in range(frequency):
             start = gen_datetime(baseTime, max_hour_limit=10)
             end = gen_datetime(start, max_hour_limit=1)
             events.append(SanitizedEvent(user_id, room_id, 1, start))
