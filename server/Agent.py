@@ -27,26 +27,25 @@ class Agent():
                 for infected_window in room.infected_windows :
                     events = fetch_events_in_window(room.room_id, infected_window) 
                     self.populate_user_visit_windows(room, events, infected_window)
-                for infected_window in room.infected_windows :
                     for user_visit in infected_window.user_visit_windows:
                         overlapped_user = overlapped_users.get(user_visit.user_id)
                         for agent_visit in infected_window.agent_visit_windows:
-                            if(user_visit.end >= agent_visit.start): # If he falls in potential infectant window
+                            if(user_visit.end >= agent_visit.start): # If he falls in potential infected window
                                 overlapped_user.add_overlap(Overlap(room.room_id, agent_visit, user_visit, infected_window))
         return overlapped_users
 
     
     def populate_user_visit_windows(self, room, events, infected_window):
         for entry_event, exit_event in zip(events[0::2], events[1::2]):
-            #filter agent events and all other events with both entry and exit before agent's first entry
-            if(entry_event.user_id == self.user_id or exit_event.timestamp < infected_window.get_agent_visits()[0].start):
+            #filter out  agent events
+            if(entry_event.user_id == self.user_id):
                 continue
             self.room_visits.get(entry_event.room_id).add_user_visit(entry_event.user_id, entry_event.timestamp, exit_event.timestamp, infected_window)
 
 if __name__ == "__main__":
     agent = Agent(54860)
 
-    #push output tp overlap.txt in mockdata
+    #push output to overlap.txt in mockdata
     # for ou in agent.overlapped_users:
     #         print(ou)
 

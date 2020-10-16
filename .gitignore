@@ -1,1 +1,6 @@
 .vscode/.ropeproject/config.py
+server/__pycache__/algorithms.cpython-37.pyc
+server/__pycache__/API.cpython-37.pyc
+server/__pycache__/contact_tracing.cpython-37.pyc
+server/__pycache__/db_interface.cpython-37.pyc
+server/__pycache__/entities.cpython-37.pyc

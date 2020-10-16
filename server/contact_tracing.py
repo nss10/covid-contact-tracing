@@ -3,7 +3,7 @@ from db_interface import get_infected_window
 from datetime import timedelta
 class InfectedWindows():
     """
-        Similar to an iterator design patter, this class has a dictionary of all the infected windows, 
+        Similar to an iterator design pattern, this class has a dictionary of all the infected windows, 
         with key being the hashcode of the window
     """
 

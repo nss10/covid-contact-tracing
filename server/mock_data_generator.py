@@ -1,6 +1,7 @@
 import random
 from datetime import datetime, timedelta
 from operator import attrgetter
+from db_interface import add_room
 from entities import Event, SanitizedEvent, Room, SanitizedStatus
 import db_interface as db
 import algorithms as algo

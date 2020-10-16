@@ -93,12 +93,10 @@ def fetch_events_in_window(room_id, window):
         
 
 def get_infected_window(room_id, visit_window):
-    '''Returns window of between two sanitized times that happened prior to the start and after the end of the given window'''
+    '''Returns window between agent's entry and end of the first sanitized time after the agent's exit'''
     
-    #timestamp in sanitized collection for a time before the window start 
-    startList =  list(sanitizedEventCollection.find({"room_id":room_id, "status":0 , "timestamp":{"$lte":visit_window.start}}, {"_id":0, "timestamp":1}))
-    
-    start = startList[-1]['timestamp'] if len(startList) > 0 else baseDate
+    #Infected window starts when the agent visits the room. Time before that doesn't matter
+    start = visit_window.start
     
     # First cleaning window begin, after user has left
     safe_cleaning_time_begin = (list(sanitizedEventCollection.find({"room_id":room_id, "status":1 , "timestamp":{"$gte":visit_window.end}}, {"_id":0, "timestamp":1}))[0])['timestamp']
